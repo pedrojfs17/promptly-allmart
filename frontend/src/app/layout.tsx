@@ -19,11 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <AuthProvider>
           <CartProvider>
             <Header />
-            <main className="container mx-auto px-4 py-8">
+            <main className="flex-grow container mx-auto px-4 py-8">
               {children}
             </main>
             <Footer />
