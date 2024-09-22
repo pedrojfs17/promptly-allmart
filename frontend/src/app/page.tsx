@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold mb-8">Welcome to My Store</h1>
+      <h1 className="text-4xl font-bold mb-8 text-orange-500">Welcome to AllMart</h1>
       <section>
         <h2 className="text-2xl font-semibold mb-4">Featured Products</h2>
         {isLoading ? (

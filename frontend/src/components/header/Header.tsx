@@ -45,8 +45,8 @@ export default function Header() {
           </Link>
         </nav>
 
-        <Link href="/" className="text-2xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2">
-          Store Name
+        <Link href="/" className="text-2xl font-bold text-orange-500 absolute left-1/2 transform -translate-x-1/2">
+          AllMart
         </Link>
 
         <UserStatus/>
