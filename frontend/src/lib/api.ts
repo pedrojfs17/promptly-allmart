@@ -68,6 +68,11 @@ export const addToCart = async (item: CartItemCreate): Promise<Cart> => {
   return response.data;
 };
 
+export const updateCartItem = async (item: CartItemCreate): Promise<Cart> => {
+  const response = await api.put<Cart>(`/cart/items/${item.product_id}`, item);
+  return response.data;
+};
+
 export const removeFromCart = async (productId: number): Promise<Cart> => {
   const response = await api.delete(`/cart/items/${productId}`);
   return response.data;

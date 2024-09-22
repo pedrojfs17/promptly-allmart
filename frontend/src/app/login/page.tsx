@@ -55,7 +55,7 @@ export default function LoginRegister() {
             </div>
             <div>
               <Label htmlFor="login-password">Password</Label>
-              <Input id="login-password" name="password" type="password" required />
+              <Input id="login-password" name="password" type="password" minLength={8} required />
             </div>
             <Button type="submit" className="w-full" disabled={isAuthLoading}>
               {isAuthLoading ? 'Logging in...' : 'Login'}
@@ -74,7 +74,7 @@ export default function LoginRegister() {
             </div>
             <div>
               <Label htmlFor="register-password">Password</Label>
-              <Input id="register-password" name="password" type="password" required />
+              <Input id="register-password" name="password" type="password" minLength={8} required />
             </div>
             <Button type="submit" className="w-full" disabled={isAuthLoading}>
               {isAuthLoading ? 'Registering...' : 'Register'}

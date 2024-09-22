@@ -44,6 +44,21 @@ def add_cart_item(item: CartItemCreate, db: Session = Depends(get_db), current_u
     db.refresh(cart)
     return cart
 
+@router.put("/cart/items/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK)
+def update_cart_item(product_id: int, item: CartItemCreate, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
+    # Get user cart
+    cart = cart_crud.get_cart(db, user_id=current_user.user_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+    
+    # If item is already in cart, update quantity, otherwise add it to cart
+    cart_item = cart_crud.get_cart_item(db, cart_id=cart.cart_id, product_id=product_id)
+    if cart_item:
+        cart_crud.update_cart_item(db, cart_item, item.quantity)
+    
+    db.refresh(cart)
+    return cart
+
 @router.delete("/cart/items/{product_id}", response_model=CartResponse, status_code=status.HTTP_200_OK)
 def remove_cart_item(product_id: int, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
     # Get user cart
