@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginRegister() {
-  const { user, login, register, isLoading } = useAuth()
+  const { user, login, register, isAuthLoading } = useAuth()
   const router = useRouter()
 
   if (user) {
@@ -57,8 +57,8 @@ export default function LoginRegister() {
               <Label htmlFor="login-password">Password</Label>
               <Input id="login-password" name="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
+            <Button type="submit" className="w-full" disabled={isAuthLoading}>
+              {isAuthLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </TabsContent>
@@ -76,8 +76,8 @@ export default function LoginRegister() {
               <Label htmlFor="register-password">Password</Label>
               <Input id="register-password" name="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Registering...' : 'Register'}
+            <Button type="submit" className="w-full" disabled={isAuthLoading}>
+              {isAuthLoading ? 'Registering...' : 'Register'}
             </Button>
           </form>
         </TabsContent>

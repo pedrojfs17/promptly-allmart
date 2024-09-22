@@ -3,18 +3,33 @@
 import { useCart } from '@/contexts/CartContext'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import useProtectedRoute from '@/hooks/useProtectedRoute'
+import PageLoading from '@/components/loading/PageLoading'
+import LoadingSpinner from '@/components/loading/LoadingSpinner'
 
 export default function Cart() {
-  const { cart, removeFromCart, clearCart, handleCheckout, isLoading } = useCart()
+  const { cart, removeFromCart, clearCart, handleCheckout, isCartLoading } = useCart()
   const router = useRouter()
+  const { user, isAuthLoading } = useProtectedRoute()
 
   const confirmOrder = async () => {
     const order = await handleCheckout()
     if (order) router.push(`/orders/confirmation/${order.order_id}`)
   }
 
-  if (isLoading) {
-    return <p>Loading cart...</p>
+  if (isAuthLoading) {
+    return <PageLoading size={48} />
+  }
+
+  if (!user) return;
+
+  if (isCartLoading) {
+    return (
+      <div>
+        <h1 className="text-4xl font-bold mb-8">Your Cart</h1>
+        <LoadingSpinner/>
+      </div>
+    )
   }
 
   if (!cart || cart.items.length === 0) {

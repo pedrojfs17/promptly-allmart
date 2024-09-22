@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/types'
 import ProductCard from '@/components/ProductCard'
+import LoadingSpinner from '@/components/loading/LoadingSpinner'
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([])
@@ -77,7 +78,7 @@ export default function Products() {
         <Button type="submit">Search</Button>
       </form>
       {isLoading ? (
-        <p>Loading products...</p>
+        <LoadingSpinner/>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {products.map((product) => (

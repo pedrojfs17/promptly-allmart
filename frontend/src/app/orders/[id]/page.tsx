@@ -9,22 +9,30 @@ import { ArrowLeft, Package } from 'lucide-react'
 import { getOrder } from '@/lib/api'
 import { Order } from '@/types'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
+import useProtectedRoute from '@/hooks/useProtectedRoute'
+import PageLoading from '@/components/loading/PageLoading'
 
 export default function OrderDetailsPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const { id } = useParams()
+  const { user, isAuthLoading } = useProtectedRoute()
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchOrderDetails = async () => {
       const order = await getOrder(parseInt(id as string))
       setOrder(order)
     }
-    fetchOrderDetails()
-  }, [id])
 
-  if (!order) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    fetchOrderDetails()
+  }, [id, user])
+  
+  if (isAuthLoading || !order) {
+    return <PageLoading size={48} />
   }
+  
+  if (!user) return;
 
   return (
     <div className="container mx-auto px-4 py-8">

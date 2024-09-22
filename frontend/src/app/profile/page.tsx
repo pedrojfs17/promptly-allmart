@@ -6,20 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getOrders } from '@/lib/api'
 import { Order } from '@/types'
-import { useAuth } from '@/contexts/AuthContext'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
+import useProtectedRoute from '@/hooks/useProtectedRoute'
+import PageLoading from '@/components/loading/PageLoading'
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useProtectedRoute()
   const [orders, setOrders] = useState<Order[]>([])
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchOrders = async () => {
       const ordersData = await getOrders()
       setOrders(ordersData)
     }
+    
     fetchOrders()
   }, [])
+
+  if (isAuthLoading) {
+    return <PageLoading size={48} />
+  }
 
   if (!user) return;
 

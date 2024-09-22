@@ -1,11 +1,20 @@
 'use client';
 
+import PageLoading from '@/components/loading/PageLoading';
 import { Button } from '@/components/ui/button'
+import useProtectedRoute from '@/hooks/useProtectedRoute';
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
 export default function OrderConfirmation() {
   const { id } = useParams()
+  const { user, isAuthLoading } = useProtectedRoute()
+
+  if (isAuthLoading) {
+    return <PageLoading size={48} />
+  }
+
+  if (!user) return;
 
   return (
     <div className="text-center">

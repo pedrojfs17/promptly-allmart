@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext'
 import { getProduct } from '@/lib/api'
 import { Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import LoadingSpinner from '@/components/loading/LoadingSpinner'
 
 export default function ProductPage() {
   const { id } = useParams()
@@ -51,9 +52,9 @@ export default function ProductPage() {
       console.error('Failed to add product to cart:', error)
     }
   }
-
+  
   if (isLoading) {
-    return <div className="text-center mt-8">Loading product...</div>
+    return <LoadingSpinner/>
   }
 
   if (error) {
