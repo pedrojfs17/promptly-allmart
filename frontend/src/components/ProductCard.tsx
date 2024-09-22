@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { useCart } from '@/contexts/CartContext'
 import { Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 type ProductProps = {
   product: Product
@@ -16,17 +17,25 @@ export default function ProductCard({ product }: ProductProps) {
   const { addToCart } = useCart()
   const { user } = useAuth()
   const router = useRouter()
+  const { showErrorToast, showSuccessToast } = useToastNotifications()
 
-  const handleAddToCart = async (productId: number) => {
+  const handleAddToCart = async (product_id: number) => {
     if (!user) {
       router.push('/login')
       return
     }
+
     try {
-      await addToCart({ product_id: productId, quantity: 1 })
-      console.log('Product added to cart successfully')
+      await addToCart({ product_id, quantity: 1 })
+      showSuccessToast(
+        "Product added to cart successfully",
+        "Product has been added to cart."
+      )
     } catch (error) {
-      console.error('Failed to add product to cart:', error)
+      showErrorToast(
+        "Failed to add product to cart",
+        "An unexpected error occurred. Please try again later."
+      )
     }
   }
 

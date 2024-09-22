@@ -9,12 +9,14 @@ import { getProduct } from '@/lib/api'
 import { Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingSpinner from '@/components/loading/LoadingSpinner'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function ProductPage() {
   const { id } = useParams()
   const { addToCart } = useCart()
   const { user } = useAuth()
   const router = useRouter()
+  const { showErrorToast, showSuccessToast } = useToastNotifications()
 
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -37,19 +39,23 @@ export default function ProductPage() {
     fetchProduct()
   }, [id])
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (product_id: number) => {
     if (!user) {
       router.push('/login')
       return
     }
 
-    if (!product) return;
-
     try {
-      await addToCart({ product_id: product.product_id, quantity: 1 })
-      console.log('Product added to cart successfully')
+      await addToCart({ product_id, quantity: 1 })
+      showSuccessToast(
+        "Product added to cart successfully",
+        "Product has been added to cart."
+      )
     } catch (error) {
-      console.error('Failed to add product to cart:', error)
+      showErrorToast(
+        "Failed to add product to cart",
+        "An unexpected error occurred. Please try again later."
+      )
     }
   }
   
@@ -89,7 +95,7 @@ export default function ProductPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button onClick={handleAddToCart} size="lg">
+          <Button onClick={() => handleAddToCart(product.product_id)} size="lg">
             Add to Cart
           </Button>
         </CardFooter>

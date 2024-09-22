@@ -11,15 +11,81 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { CartItem } from '@/types'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function Cart() {
   const { cart, updateCartItem, removeFromCart, clearCart, handleCheckout, isCartLoading } = useCart()
   const router = useRouter()
   const { user, isAuthLoading } = useProtectedRoute()
+  const { showErrorToast, showSuccessToast } = useToastNotifications()
 
-  const confirmOrder = async () => {
-    const order = await handleCheckout()
-    if (order) router.push(`/orders/confirmation/${order.order_id}`)
+  const handleConfirmOrder = async () => {
+    try {
+      const order = await handleCheckout()
+      if (order) {
+        showSuccessToast(
+          "Order placed successfully",
+          "Your order has been confirmed and is being processed."
+        )
+        router.push(`/orders/confirmation/${order.order_id}`)
+      }
+    } catch (error) {
+      showErrorToast(
+        "Failed to place order",
+        "An unexpected error occurred. Please try again later."
+      )
+    }
+  }
+
+  const handleRemoveFromCart = async (productId: number) => {
+    try {
+      await removeFromCart(productId)
+      showSuccessToast(
+        "Item removed",
+        "The item has been successfully removed from your cart."
+      )
+    } catch (error) {
+      showErrorToast(
+        "Failed to remove item",
+        "An error occurred while removing the item from your cart. Please try again."
+      )
+    }
+  }
+
+  const handleClearCart = async () => {
+    try {
+      await clearCart()
+      showSuccessToast(
+        "Cart cleared",
+        "All items have been removed from your cart."
+      )
+    } catch (error) {
+      showErrorToast(
+        "Failed to clear cart",
+        "An error occurred while clearing your cart. Please try again."
+      )
+    }
+  }
+
+  const handleUpdateQuantity = async (item: CartItem, quantity: number) => {
+    if (quantity <= 0) {
+      await handleRemoveFromCart(item.product_id)
+      return;
+    }
+
+    try {
+      item.quantity = quantity;
+      await updateCartItem(item)
+      showSuccessToast(
+        "Cart item updated",
+        "The item quantity has been successfully updated."
+      )
+    } catch (error) {
+      showErrorToast(
+        "Failed to update item",
+        "An error occurred while updating item quantity. Please try again."
+      )
+    }
   }
 
   if (isAuthLoading) {
@@ -28,7 +94,7 @@ export default function Cart() {
 
   if (!user) return;
 
-  if (isCartLoading || !cart) {
+  if (isCartLoading) {
     return (
       <div>
         <h1 className="text-4xl font-bold mb-8">Your Cart</h1>
@@ -37,16 +103,7 @@ export default function Cart() {
     )
   }
 
-  const total = cart.items.reduce((sum, item) => sum + item.quantity * parseFloat(item.product.price), 0)
-
-  const updateQuantity = async (item: CartItem, quantity: number) => {
-    if (quantity > 0) {
-      item.quantity = quantity;
-      await updateCartItem(item)
-    } else {
-      await removeFromCart(item.product_id)
-    }
-  }
+  const total = cart?.items.reduce((sum, item) => sum + item.quantity * parseFloat(item.product.price), 0) || 0
 
   return (
     <div>
@@ -57,7 +114,7 @@ export default function Cart() {
             <CardTitle>Cart Items</CardTitle>
           </CardHeader>
           <CardContent>
-            {cart.items.length === 0 ? (
+            {(!cart || cart.items.length === 0) ? (
               <p className="text-center text-gray-500">Your cart is empty</p>
             ) : (
               cart.items.map((item) => (
@@ -78,7 +135,7 @@ export default function Cart() {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item, item.quantity - 1)}
+                        onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -89,12 +146,12 @@ export default function Cart() {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item, item.quantity + 1)}
+                        onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => removeFromCart(item.product_id)}>
+                    <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleRemoveFromCart(item.product_id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -109,7 +166,7 @@ export default function Cart() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {cart.items.map((item) => (
+              {cart && cart.items.map((item) => (
                 <div key={item.product_id} className="flex justify-between text-sm">
                   <span>{item.product.name} (x{item.quantity})</span>
                   <span>${(item.quantity * parseFloat(item.product.price)).toFixed(2)}</span>
@@ -123,8 +180,8 @@ export default function Cart() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <Button className="w-full" disabled={cart.items.length === 0}>Proceed to Checkout</Button>
-            <Button variant="outline" className="w-full" onClick={clearCart} disabled={cart.items.length === 0}>
+            <Button className="w-full" disabled={!cart || cart.items.length === 0} onClick={handleConfirmOrder}>Confirm Order</Button>
+            <Button variant="outline" className="w-full" onClick={handleClearCart} disabled={!cart || cart.items.length === 0}>
               Clear Cart
             </Button>
           </CardFooter>

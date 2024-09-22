@@ -7,16 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function LoginRegister() {
   const { user, login, register, isAuthLoading } = useAuth()
   const router = useRouter()
-
-  if (user) {
-    router.push('/');
-    return
-  }
-
+  const { showErrorToast } = useToastNotifications()
   const [activeTab, setActiveTab] = useState('login')
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,7 +22,15 @@ export default function LoginRegister() {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
-    login(email, password)
+    try {
+      await login(email, password)
+    } catch (error) {
+      console.log(error)
+      showErrorToast(
+        "Failed to login",
+        (error as Error).message
+      )
+    }
   }
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,7 +41,19 @@ export default function LoginRegister() {
     const username = formData.get('username') as string
     const password = formData.get('password') as string
 
-    register(email, username, password)
+    try {
+      await register(email, username, password)
+    } catch (error) {
+      showErrorToast(
+        "Failed to register",
+        (error as Error).message
+      )
+    }
+  }
+
+  if (user) {
+    router.push('/');
+    return
   }
 
   return (
@@ -51,7 +67,7 @@ export default function LoginRegister() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="login-email">Email</Label>
-              <Input id="login-email" name="email" type="text" required />
+              <Input id="login-email" name="email" type="email" required />
             </div>
             <div>
               <Label htmlFor="login-password">Password</Label>

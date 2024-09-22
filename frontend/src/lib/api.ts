@@ -16,24 +16,60 @@ api.interceptors.request.use((config) => {
 });
 
 export const login = async (credentials: LoginCredentials): Promise<Token> => {
-  // For login we have to use form data instead of json
-  const formData = new FormData();
-  formData.append('email', credentials.email);
-  formData.append('password', credentials.password);
+  try {
+    // For login we have to use form data instead of json
+    const formData = new FormData();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
 
-  const response = await api.post<Token>('/auth/token', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+    const response = await api.post<Token>('/auth/token', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-  localStorage.setItem('token', response.data.access_token);
-  return response.data;
+    localStorage.setItem('token', response.data.access_token);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        // The request was made and the server responded with a status code different from OK
+        throw new Error(error.response.data.detail || 'Login failed');
+      } else if (error.request) {
+        // The request was made but no response was received
+        throw new Error('No response received from server');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        throw new Error('Error setting up the request');
+      }
+    } else {
+      // For non-Axios errors, just throw the error as is
+      throw error;
+    }
+  }
 };
 
 export const register = async (userData: UserCreate): Promise<User> => {
-  const response = await api.post<User>('/users', userData);
-  return response.data;
+  try {
+    const response = await api.post<User>('/users', userData);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        // The request was made and the server responded with a status code different from OK
+        throw new Error(error.response.data.detail || 'Registration failed');
+      } else if (error.request) {
+        // The request was made but no response was received
+        throw new Error('No response received from server');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        throw new Error('Error setting up the request');
+      }
+    } else {
+      // For non-Axios errors, just throw the error as is
+      throw error;
+    }
+  }
 };
 
 export const getCurrentUser = async (): Promise<User> => {

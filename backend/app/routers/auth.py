@@ -9,7 +9,6 @@ router = APIRouter()
 
 @router.post("/auth/token", response_model=Token)
 def login_for_access_token(form_data: LoginRequestForm = Depends(), db: Session = Depends(get_db)):
-    # Note: form_data.username actually contains the email
     user = user_crud.get_user_by_email(db, form_data.email)
     if not user:
         raise HTTPException(status_code=404, detail="Email not found")

@@ -16,13 +16,19 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const { id } = useParams()
   const { user, isAuthLoading } = useProtectedRoute()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return;
 
     const fetchOrderDetails = async () => {
-      const order = await getOrder(parseInt(id as string))
-      setOrder(order)
+      try {
+        const order = await getOrder(parseInt(id as string))
+        setOrder(order)
+      } catch (err) {
+        setError('Failed to load order.')
+        console.error('Error fetching order:', err)
+      }
     }
 
     fetchOrderDetails()
@@ -33,6 +39,10 @@ export default function OrderDetailsPage() {
   }
   
   if (!user) return;
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

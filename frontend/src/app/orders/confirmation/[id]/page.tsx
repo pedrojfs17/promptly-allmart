@@ -20,7 +20,7 @@ export default function OrderConfirmation() {
     <div className="text-center">
       <h1 className="text-4xl font-bold mb-8">Order Confirmation</h1>
       <p className="text-xl mb-4">Thank you for your order!</p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         <Button asChild>
           <Link href={`/orders/${id}`}>View Order</Link>
         </Button>
