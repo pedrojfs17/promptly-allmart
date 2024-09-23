@@ -5,28 +5,30 @@ import { getProducts } from '@/lib/api'
 import { Product } from '@/types'
 import ProductCard from '@/components/ProductCard'
 import PageLoading from '@/components/loading/PageLoading'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { showErrorToast } = useToastNotifications()
+  
+  const [featuredProducts, setFeaturedProducts] = useState<Product[] | null>(null)
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
-      setIsLoading(true)
       try {
         const data = await getProducts(undefined, undefined, undefined, 3)
         setFeaturedProducts(data)
       } catch (error) {
-        console.error('Failed to fetch featured products:', error)
-      } finally {
-        setIsLoading(false)
+        showErrorToast(
+          "Failed to fetch featured products",
+          (error as Error).message
+        )
       }
     }
 
     fetchFeaturedProducts()
   }, [])
 
-  if (isLoading) {
+  if (!featuredProducts) {
     return <PageLoading size={48} />
   }
 

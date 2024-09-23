@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -11,12 +11,15 @@ import { Order } from '@/types'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
 import useProtectedRoute from '@/hooks/useProtectedRoute'
 import PageLoading from '@/components/loading/PageLoading'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function OrderDetailsPage() {
-  const [order, setOrder] = useState<Order | null>(null)
+  const router = useRouter()
   const { id } = useParams()
   const { user, isAuthLoading } = useProtectedRoute()
-  const [error, setError] = useState<string | null>(null)
+  const { showErrorToast } = useToastNotifications()
+
+  const [order, setOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     if (!user) return;
@@ -25,9 +28,12 @@ export default function OrderDetailsPage() {
       try {
         const order = await getOrder(parseInt(id as string))
         setOrder(order)
-      } catch (err) {
-        setError('Failed to load order.')
-        console.error('Error fetching order:', err)
+      } catch (error) {
+        showErrorToast(
+          "Failed to load order",
+          (error as Error).message
+        )
+        router.push('/')
       }
     }
 
@@ -39,10 +45,6 @@ export default function OrderDetailsPage() {
   }
   
   if (!user) return;
-
-  if (error) {
-    return <div className="text-center mt-8 text-red-500">{error}</div>
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

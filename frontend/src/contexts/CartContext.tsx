@@ -10,6 +10,7 @@ import {
   createOrder
 } from '@/lib/api'
 import { Cart, CartItemCreate, Order } from '@/types'
+import { useAuth } from './AuthContext'
 
 type CartContextType = {
   cart: Cart | null;
@@ -24,12 +25,17 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
   const [cart, setCart] = useState<Cart | null>(null)
   const [isCartLoading, setIsCartLoading] = useState(false)
 
   useEffect(() => {
-    fetchCart()
-  }, [])
+    if (!user)
+      setCart(null);
+    else 
+      fetchCart()
+  }, [user])
 
   const fetchCart = async () => {
     setIsCartLoading(true)
@@ -37,7 +43,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const cartData = await getCart()
       setCart(cartData)
     } catch (error) {
-      console.error('Failed to fetch cart:', error)
+      throw error
     } finally {
       setIsCartLoading(false)
     }
@@ -49,7 +55,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const updatedCart = await apiAddToCart(item)
       setCart(updatedCart)
     } catch (error) {
-      console.error('Failed to add to cart:', error)
+      throw error
     } finally {
       setIsCartLoading(false)
     }
@@ -61,7 +67,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const updatedCart = await apiUpdateCartItem(item)
       setCart(updatedCart)
     } catch (error) {
-      console.error('Failed to update cart item quantity:', error)
+      throw error
     } finally {
       setIsCartLoading(false)
     }
@@ -73,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const updatedCart = await apiRemoveFromCart(productId)
       setCart(updatedCart)
     } catch (error) {
-      console.error('Failed to remove from cart:', error)
+      throw error
     } finally {
       setIsCartLoading(false)
     }
@@ -85,7 +91,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const updatedCart = await apiClearCart()
       setCart(updatedCart)
     } catch (error) {
-      console.error('Failed to clear cart:', error)
+      throw error
     } finally {
       setIsCartLoading(false)
     }
@@ -97,9 +103,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       fetchCart()
       return order;
     } catch (error) {
-      console.error('Failed to create order:', error)
+      throw error
     }
-    return null;
   }
 
   return (

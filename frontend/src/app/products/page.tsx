@@ -8,8 +8,11 @@ import { getProducts, getCategories } from '@/lib/api'
 import { Product, Category } from '@/types'
 import ProductCard from '@/components/ProductCard'
 import LoadingSpinner from '@/components/loading/LoadingSpinner'
+import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function Products() {
+  const { showErrorToast } = useToastNotifications()
+
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -27,7 +30,10 @@ export default function Products() {
       const data = await getProducts(searchTerm, selectedCategory ? parseInt(selectedCategory) : undefined)
       setProducts(data)
     } catch (error) {
-      console.error('Failed to fetch products:', error)
+      showErrorToast(
+        'Failed to fetch products',
+        (error as Error).message
+      )
     } finally {
       setIsLoading(false)
     }
@@ -38,7 +44,10 @@ export default function Products() {
       const data = await getCategories()
       setCategories(data)
     } catch (error) {
-      console.error('Failed to fetch categories:', error)
+      showErrorToast(
+        'Failed to fetch categories',
+        (error as Error).message
+      )
     }
   }
 

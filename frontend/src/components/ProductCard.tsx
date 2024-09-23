@@ -34,7 +34,7 @@ export default function ProductCard({ product }: ProductProps) {
     } catch (error) {
       showErrorToast(
         "Failed to add product to cart",
-        "An unexpected error occurred. Please try again later."
+        (error as Error).message
       )
     }
   }

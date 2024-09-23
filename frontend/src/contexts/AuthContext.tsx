@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = await getCurrentUser()
       setUser(userData)
     } catch (error) {
-      console.error('Failed to fetch user:', error)
       localStorage.removeItem('token')
     } finally {
       setIsAuthLoading(false)
@@ -45,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiLogin({ email, password })
       await fetchUser()
     } catch (error) {
-      console.error('Login failed:', error)
       throw error
     } finally {
       setIsAuthLoading(false)
@@ -58,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiRegister({ email, username, password })
       await login(email, password)
     } catch (error) {
-      console.error('Registration failed:', error)
       throw error
     } finally {
       setIsAuthLoading(false)

@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
@@ -8,19 +7,23 @@ import useProtectedRoute from '@/hooks/useProtectedRoute'
 import PageLoading from '@/components/loading/PageLoading'
 import LoadingSpinner from '@/components/loading/LoadingSpinner'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { CartItem } from '@/types'
-import { Minus, Plus, Trash2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { useToastNotifications } from '@/hooks/useToastNotifications'
+import CartItemComponent from '@/components/CartItem'
+import { useState } from 'react'
 
 export default function Cart() {
-  const { cart, updateCartItem, removeFromCart, clearCart, handleCheckout, isCartLoading } = useCart()
   const router = useRouter()
+
+  const { cart, clearCart, handleCheckout, isCartLoading } = useCart()
   const { user, isAuthLoading } = useProtectedRoute()
   const { showErrorToast, showSuccessToast } = useToastNotifications()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleConfirmOrder = async () => {
     try {
+      setIsLoading(true)
       const order = await handleCheckout()
       if (order) {
         showSuccessToast(
@@ -32,23 +35,10 @@ export default function Cart() {
     } catch (error) {
       showErrorToast(
         "Failed to place order",
-        "An unexpected error occurred. Please try again later."
+        (error as Error).message
       )
-    }
-  }
-
-  const handleRemoveFromCart = async (productId: number) => {
-    try {
-      await removeFromCart(productId)
-      showSuccessToast(
-        "Item removed",
-        "The item has been successfully removed from your cart."
-      )
-    } catch (error) {
-      showErrorToast(
-        "Failed to remove item",
-        "An error occurred while removing the item from your cart. Please try again."
-      )
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -62,33 +52,12 @@ export default function Cart() {
     } catch (error) {
       showErrorToast(
         "Failed to clear cart",
-        "An error occurred while clearing your cart. Please try again."
+        (error as Error).message
       )
     }
   }
 
-  const handleUpdateQuantity = async (item: CartItem, quantity: number) => {
-    if (quantity <= 0) {
-      await handleRemoveFromCart(item.product_id)
-      return;
-    }
-
-    try {
-      item.quantity = quantity;
-      await updateCartItem(item)
-      showSuccessToast(
-        "Cart item updated",
-        "The item quantity has been successfully updated."
-      )
-    } catch (error) {
-      showErrorToast(
-        "Failed to update item",
-        "An error occurred while updating item quantity. Please try again."
-      )
-    }
-  }
-
-  if (isAuthLoading) {
+  if (isAuthLoading || isLoading) {
     return <PageLoading size={48} />
   }
 
@@ -118,44 +87,7 @@ export default function Cart() {
               <p className="text-center text-gray-500">Your cart is empty</p>
             ) : (
               cart.items.map((item) => (
-                <div key={item.product_id} className="flex flex-col sm:flex-row sm:justify-between items-center space-y-2 sm:space-y-0 sm:space-x-4 py-4 border-b last:border-b-0">
-                  <div className="flex items-center w-full sm:w-auto">
-                    <Image 
-                      src={`/api/products/${item.product.product_id}/primary-image`} 
-                      alt={item.product.name} width={80} height={80} className="rounded-md" 
-                    />
-                    <div className="ml-4 flex-grow">
-                      <h3 className="font-semibold">{item.product.name}</h3>
-                      <p className="text-sm text-gray-500">${parseFloat(item.product.price).toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end space-x-2 sm:space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <div className="w-16 h-8 flex items-center justify-center border border-input bg-background text-sm">
-                        {item.quantity}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleRemoveFromCart(item.product_id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                <CartItemComponent item={item} key={item.product_id} />
               ))
             )}
           </CardContent>

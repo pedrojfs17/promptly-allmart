@@ -12,6 +12,7 @@ import PageLoading from '@/components/loading/PageLoading'
 
 export default function ProfilePage() {
   const { user, isAuthLoading } = useProtectedRoute()
+  
   const [orders, setOrders] = useState<Order[]>([])
 
   useEffect(() => {

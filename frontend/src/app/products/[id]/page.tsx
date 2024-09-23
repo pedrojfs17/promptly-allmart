@@ -12,27 +12,25 @@ import LoadingSpinner from '@/components/loading/LoadingSpinner'
 import { useToastNotifications } from '@/hooks/useToastNotifications'
 
 export default function ProductPage() {
+  const router = useRouter()
   const { id } = useParams()
   const { addToCart } = useCart()
   const { user } = useAuth()
-  const router = useRouter()
   const { showErrorToast, showSuccessToast } = useToastNotifications()
 
   const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setIsLoading(true)
       try {
         const data = await getProduct(parseInt(id as string))
         setProduct(data)
-      } catch (err) {
-        setError('Failed to load product. Please try again later.')
-        console.error('Error fetching product:', err)
-      } finally {
-        setIsLoading(false)
+      } catch (error) {
+        showErrorToast(
+          "Failed to load product",
+          (error as Error).message
+        )
+        router.push('/')
       }
     }
 
@@ -54,21 +52,13 @@ export default function ProductPage() {
     } catch (error) {
       showErrorToast(
         "Failed to add product to cart",
-        "An unexpected error occurred. Please try again later."
+        (error as Error).message
       )
     }
   }
   
-  if (isLoading) {
-    return <LoadingSpinner/>
-  }
-
-  if (error) {
-    return <div className="text-center mt-8 text-red-500">{error}</div>
-  }
-
   if (!product) {
-    return <div className="text-center mt-8">Product not found</div>
+    return <LoadingSpinner/>
   }
 
   return (
