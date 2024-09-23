@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Commerce Shopping App Frontend
 
-## Getting Started
+This is the frontend for the E-Commerce Shopping App, built with Next.js.
 
-First, run the development server:
+## Setup Instructions
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Docker installed on your machine
+- Git (for cloning the repository)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Steps to Run the Frontend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Navigate to the frontend directory:
 
-## Learn More
+   ```
+   cd frontend
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. Set up the environment variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   - Copy the `.env.example` file to `.env`:
+     ```
+     cp .env.example .env
+     ```
+   - Open the `.env` file and fill in the necessary values for your environment.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Build the Docker image:
 
-## Deploy on Vercel
+   ```
+   docker build -t ecommerce-frontend .
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Run the frontend using Docker:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```
+   docker run -p 3000:3000 --env-file .env ecommerce-frontend
+   ```
+
+   The frontend will be accessible at `http://localhost:3000`.
+
+## API Proxy
+
+This application uses Next.js API routes as a proxy to redirect requests to the backend. When a request is made to `/api/:path`, it is automatically redirected to the backend URL `/:path`.
+
+## File Structure
+
+The main application code is located in the `src` folder, organized as follows:
+
+### `app/`
+
+Contains all the routing and pages:
+
+- `/`: Shows three featured products
+- `/products`: Displays a complete list of products with search and category filtering
+- `/products/[id]`: Shows details for a single product
+- `/login`: Contains login and registration forms
+- `/cart`: Displays the user's cart (for logged-in users)
+- `/profile`: Shows the user profile with a list of past orders (for logged-in users)
+- `/orders/confirmation/[id]`: Confirms a newly created order (for logged-in users)
+- `/orders/[id]`: Shows details for a specific order (for logged-in users)
+
+### `components/`
+
+- `auth/`: Login and Register form components
+- `layout/`: Components for the application's Header and Footer
+- `loading/`: Components for displaying loading states
+- `ui/`: Imported shadcn components
+- `CartItem.tsx`: Component for displaying a cart item
+- `OrderStatusBadge.tsx`: Component for showing an order status badge (styled based on status)
+- `ProductCard.tsx`: Component for displaying a single product in a card format
+
+### `contexts/`
+
+Stores global app state:
+
+- `AuthContext.tsx`: Provides access to authentication state
+- `CartContext.tsx`: Provides access to cart items
+
+### `hooks/`
+
+- `useProtectedRoute.ts`: Redirects users from protected routes if not logged in
+- `useToastNotification.ts`: Displays notifications to users after specific actions
+
+### `lib/`
+
+- `api.ts`: Handles all API requests, setting headers and managing error handling
+
+### `types/`
+
+Defines TypeScript types for the application based on the database schema
